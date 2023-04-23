@@ -37,6 +37,10 @@ const GigSchema = new mongoose.Schema({
     localAssigned: { // local's sid
         type: String,
         required: false
+    },
+    conversationId: {
+        type: String,
+        required: false
     }
 })
 

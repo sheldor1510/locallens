@@ -1,0 +1,32 @@
+<body>
+    <div class="container-fluid">
+        
+        <ul class="list-group" id="messages"></ul>
+        
+    </div>
+    <div style="position: fixed; bottom:0;width:100vw;">
+        <form action="">
+            <input type="text" name="" id="m" class="form-control" placeholder="Enter the message..." value="" required="required" title="" style="background:rgb(34, 20, 48);color:white;">
+        </form>
+    </div>
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap JavaScript -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        let username = '<%-user%>';
+        $('form').submit(function(){
+            var msg = $('#m').val();
+            if(msg.length > 0)
+                socket.emit('chat message', username + ": " + msg);
+            else
+                console.log("Enter a valid msg :)");
+            $('#m').val("");
+            return false;
+        });
+        socket.on('chat message', function(text){
+            $("#messages").append('<li class="list-group-item">' + '<b>' + text.split(":")[0] + '</b>:' + text.split(":")[1] +'</li>');
+        });
+    </script>
+</body>

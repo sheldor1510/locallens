@@ -60,7 +60,20 @@ app.use(function (err, req, res, next) {
   });
 });
 
-http.createServer(app)
-  .listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Listening on ${config.baseURL}`);
+});
+
+const io = require('socket.io')(server, { cors: true, origins: '*:*' });
+
+io.on('connection', (socket) => {
+  console.log("a user connected");
+  socket.on('disconnect', () => {
+    console.log("a user disconnected");
   });
+
+  socket.on('chat message', (message) => {
+    console.log("Message: " + message);
+    io.emit('chat message', message);
+  });
+});

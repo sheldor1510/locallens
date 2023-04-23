@@ -1,4 +1,4 @@
-const types = ['humanized', 'personalized', 'instant']
+const types = ['humanized', 'personalized', 'conversational']
 let selectedType = 'humanized';
 
 const refreshTypes = (type) => {

@@ -173,7 +173,7 @@ router.get('/gig/:id', requiresAuth(), async function (req, res, next) {
     case 'personalized':
       gig.typeText = 'Video Call ($24/hr)'
       break;
-    case 'instant':
+    case 'conversational':
       gig.typeText = 'Text-based ($16/hr)'
       break;
   }

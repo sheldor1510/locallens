@@ -26,7 +26,8 @@ mongoose.connect(process.env.MONGODB_URI, { useUnifiedTopology: true, useNewUrlP
 
 const config = {
   authRequired: false,
-  auth0Logout: true
+  auth0Logout: true,
+  baseURL: process.env.BASE_URL,
 };
 
 const port = process.env.PORT || 3000;

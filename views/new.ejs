@@ -1,0 +1,41 @@
+<body>
+    <div>
+        <h2>Create a new gig</h2>
+        <label>Where are you going?</label>
+        <input type="text" name="location" placeholder="Los Angeles" id="location">
+        <label>When are you going?</label>
+        <input type="date" name="startDate" id="startDate">
+        <label>When are you coming back?</label>
+        <input type="date" name="endDate" id="endDate">
+        <label>Type of gig</label>
+        <div class="types">
+            <div class="type" id="humanized">
+               <span style="font-size: 1.2vw; font-weight: 600">Humanized (physical)</span> <br><br>
+                - $32/hr (min wage + 100%) <br>
+                - Need to give specific date and time slots <br>
+                - Needs to be in the specific area
+            </div>
+            <div class="type" id="personalized">
+                <span style="font-size: 1.2vw; font-weight: 600">Personalized (video call)</span> <br><br>
+                - $24/hr (min wage + 50%) <br>
+                - (X number of time slots booked for the specific dates) <br>
+                - Presence in the city during the gig not required
+            </div>
+            <div class="type" id="instant">
+                <span style="font-size: 1.2vw; font-weight: 600">Instant (text-based)</span> <br><br>
+                - $16/hr (min wage) <br>
+                - 8 hours (response within 30 minutes) <br>
+                - Specific dates <br>
+                - Presence in the city during the gig not required
+            </div>
+        </div>
+        <label>What are you looking for in this trip?</label>
+        <textarea
+            name="lookingForText"
+            placeholder="I would like to go on hikes, treks, or just do something fun outside."
+            maxlength="500"
+            id="lookingForText"
+        ></textarea>
+        <button id="create-gig">Create</button>
+    </div>
+</body>

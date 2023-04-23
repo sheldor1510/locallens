@@ -54,7 +54,59 @@ window.addEventListener('click', async (e) => {
         })
         const respJSON = await resp.json();
         if (respJSON.success) {
-            window.location.href = '/dashboard'
+            window.location.href = '/posted'
+        } else {
+            alert(respJSON.error)
+        }
+    } else if (e.target.id == 'apply-gig') {
+        const gigID = document.getElementById('gigId').value;
+        const applyNote = document.getElementById('apply-note').value;
+        const data = { gigID, applyNote }
+        const resp = await fetch('/apply-gig', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        const respJSON = await resp.json();
+        if (respJSON.success) {
+            window.location.href = '/applied'
+        } else {
+            alert(respJSON.error)
+        }
+    } else if (e.target.id == 'accept-gig') {
+        const responseId = document.getElementById('responseId').value;
+        const data = { responseId }
+        const resp = await fetch('/accept-gig', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        const respJSON = await resp.json();
+        if (respJSON.success) {
+            window.location.href = '/booked'
+        } else {
+            alert(respJSON.error)
+        }
+    } else if (e.target.id == 'decline-gig') {
+        const responseId = document.getElementById('responseId').value;
+        const data = { responseId }
+        const resp = await fetch('/decline-gig', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        const respJSON = await resp.json();
+        if (respJSON.success) {
+            window.location.href = '/posted'
         } else {
             alert(respJSON.error)
         }

@@ -169,7 +169,7 @@ h3 {
 }
 
 .gig {
-    height: auto;
+    height: 25vw;
     width: 20vw;
     border: 1px solid black;
     margin-right: 2vw;
@@ -193,7 +193,8 @@ h3 {
 
 .gig p {
     font-size: 1vw;
-    margin-left: -4.5vw;
+    text-align: left;
+    margin-left: 1vw;
     margin-top: -1vw;
 }
 
@@ -245,4 +246,48 @@ h3 {
 .active {
     background: black;
     color: white;
+}
+
+.response {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 24px 12px 28px;
+    gap: 8px;
+    width: 45vw;
+    height: auto;
+    padding: 1vw;
+    background: transparent;
+    border-radius: 6px;
+    border: 1px solid black;
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 1vw;
+    line-height: 24px;
+    color: black;
+    margin: auto;
+    margin-top: 5vw;
+    margin-bottom: 3vw;
+    margin-top: 0.5vw;
+}
+
+.response p {
+    font-size: 1.2vw;
+    margin-left: -4.5vw;
+    margin-top: -1vw;
+    font-weight: normal;
+    padding: 1vw;
+    width: 30rem;
+    margin-left: 0.1vw;
+    word-wrap: break-word;
+}
+
+.list-group-item {
+    font-size: 1.2vw;
+    margin-left: -4.5vw;
+    margin-top: -1vw;
+    font-weight: normal;
+    padding: 0.5vw;
 }

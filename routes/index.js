@@ -6,21 +6,27 @@ const { interestExamples, bioExamples } = require('../ai/data');
 const { requiresAuth } = require('express-openid-connect');
 const User = require('../models/User')
 const Gig = require('../models/Gig')
+const Response = require('../models/Response')
 
 router.get('/', async function (req, res, next) {
   if (req.oidc.user) {
     const user = req.oidc.user;
-    const newUser = new User({
-      nickname: user.nickname,
-      name: user.name,
-      email: user.email,
-      picture: user.picture,
-      sid: user.sid
-    })
-    await newUser.save()
-    res.render('info', {
-      userProfile: JSON.stringify(user)
-    })
+    const userFound = await User.findOne({ sid: user.sid })
+    if (!userFound) {
+      const newUser = new User({
+        nickname: user.nickname,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        sid: user.sid
+      })
+      await newUser.save()
+      res.render('info', {
+        userProfile: JSON.stringify(user)
+      })
+    } else {
+      res.redirect('/dashboard')
+    }
   } else {
     res.render('login', {
       title: 'LocalLens',
@@ -70,11 +76,39 @@ router.get('/dashboard', requiresAuth(), async function (req, res, next) {
   const userID = req.oidc.user.sid;
   const user = await User.findOne({ sid: userID })
   const tags = user.tags;
-  const gigs = await Gig.find({})
-  //TODO: use tags to filter through gigs and recommend this user gigs (2 same occurances atleast)
+  const gigsFromDB = await Gig.find({ active: true })
+  const gigs = []
+  gigsFromDB.forEach((gig) => {
+    if (user.tags.includes(gig.tags[0]) || user.tags.includes(gig.tags[1])) {
+      if (gig.postedBy !== userID) {
+        gigs.push(gig)
+      }
+    }
+  })
+  gigs.forEach((gig) => {
+    let img = ''
+    if (gig.location === 'Los Angeles') {
+      img = '/images/la.jpg'
+    } else if (gig.location === 'Seattle') {
+      img = '/images/seattle.jpg'
+    } else if (gig.location === 'Miami') {
+      img = '/images/miami.jpg'
+    }
+    const startDate = new Date(gig.startDate)
+    const endDate = new Date(gig.endDate)
+    gig.startDate = startDate.toDateString()
+    gig.endDate = endDate.toDateString()
+    gig.postedBy = img
+  })
   res.render('dashboard', {
-    userProfile: JSON.stringify(req.oidc.user)
+    userProfile: JSON.stringify(req.oidc.user),
+    gigs
   });
+});
+
+router.get('/chat', requiresAuth(), async (req, res) => {
+  const userId = req.oidc.user.name;
+  res.render('chat', { user: userId });
 });
 
 router.post('/new-gig', requiresAuth(), async function (req, res, next) {
@@ -111,12 +145,172 @@ router.post('/new-gig', requiresAuth(), async function (req, res, next) {
   res.json({ success: true })
 })
 
-router.get('/profile', requiresAuth(), function (req, res, next) {
-  res.render('profile', {
-    userProfile: JSON.stringify(req.oidc.user, null, 2),
-    title: 'Profile page'
-  });
-});
+router.get('/gig/:id', requiresAuth(), async function (req, res, next) {
+  const gig = await Gig.findById(req.params.id)
+  const userID = req.oidc.user.sid;
+  let responses = []
+  let showresponses = false
+  if (gig.postedBy === userID) {
+    responses = await Response.find({ gigID: req.params.id, accepted: false })
+    showresponses = true
+  }
+  let img = '/images/'
+  if (gig.location === 'Los Angeles') {
+    img += 'la.jpg'
+  } else if (gig.location === 'Seattle') {
+    img += 'seattle.jpg'
+  } else if (gig.location === 'Miami') {
+    img += 'miami.jpg'
+  }
+  const startDate = new Date(gig.startDate)
+  const endDate = new Date(gig.endDate)
+  gig.startDate = startDate.toDateString()
+  gig.endDate = endDate.toDateString()
+  switch (gig.type) {
+    case 'humanized':
+      gig.typeText = 'Physically roaming around ($32/hr)'
+      break;
+    case 'personalized':
+      gig.typeText = 'Video Call ($24/hr)'
+      break;
+    case 'instant':
+      gig.typeText = 'Text-based ($16/hr)'
+      break;
+  }
+  console.log(responses);
+  res.render('gig', {
+    gig,
+    img,
+    responses,
+    showresponses
+  })
+})
+
+router.get('/posted', requiresAuth(), async function (req, res, next) {
+  const userID = req.oidc.user.sid;
+  const gigs = await Gig.find({ postedBy: userID, active: true })
+  gigs.forEach((gig) => {
+    let img = ''
+    if (gig.location === 'Los Angeles') {
+      img = '/images/la.jpg'
+    } else if (gig.location === 'Seattle') {
+      img = '/images/seattle.jpg'
+    } else if (gig.location === 'Miami') {
+      img = '/images/miami.jpg'
+    }
+    const startDate = new Date(gig.startDate)
+    const endDate = new Date(gig.endDate)
+    gig.startDate = startDate.toDateString()
+    gig.endDate = endDate.toDateString()
+    gig.postedBy = img
+  })
+  res.render('posted', {
+    gigs
+  })
+})
+
+router.get('/applied', requiresAuth(), async function (req, res, next) {
+  const userID = req.oidc.user.nickname;
+  const responses = await Response.find({ applicant: userID })
+  const gigs = []
+  for (const response of responses) {
+    const gig = await Gig.findById(response.gigID)
+    if (gig.active) {
+      gig.status = response.accepted ? 'Accepted' : 'Pending'
+    } else {
+      gig.status = 'Closed'
+    }
+    let img = ''
+    if (gig.location === 'Los Angeles') {
+      img = '/images/la.jpg'
+    } else if (gig.location === 'Seattle') {
+      img = '/images/seattle.jpg'
+    } else if (gig.location === 'Miami') {
+      img = '/images/miami.jpg'
+    }
+    const startDate = new Date(gig.startDate)
+    const endDate = new Date(gig.endDate)
+    gig.startDate = startDate.toDateString()
+    gig.endDate = endDate.toDateString()
+    gig.postedBy = img
+    gigs.push(gig)
+  }
+  res.render('applied', {
+    gigs
+  })
+})
+
+router.get('/booked', requiresAuth(), async function (req, res, next) {
+  const user = req.oidc.user;
+  let gigs = []
+  gigs = await Gig.find({ localAssigned: user.nickname, active: false })
+  if (gigs.length === 0) {
+    gigs = await Gig.find({ postedBy: user.sid, active: false })
+  }
+  console.log(gigs);
+  gigs.forEach((gig) => {
+    let img = ''
+    if (gig.location === 'Los Angeles') {
+      img = '/images/la.jpg'
+    } else if (gig.location === 'Seattle') {
+      img = '/images/seattle.jpg'
+    } else if (gig.location === 'Miami') {
+      img = '/images/miami.jpg'
+    }
+    const startDate = new Date(gig.startDate)
+    const endDate = new Date(gig.endDate)
+    gig.startDate = startDate.toDateString()
+    gig.endDate = endDate.toDateString()
+    gig.postedBy = img
+  })
+  res.render('booked', {
+    gigs
+  })
+})
+
+router.post('/apply-gig', (req, res) => {
+  const { gigID, applyNote } = req.body;
+  const userID = req.oidc.user.nickname;
+  const newResponse = new Response({
+    gigID,
+    note: applyNote,
+    applicant: userID
+  })
+  newResponse.save()
+  res.json({ success: true })
+})
+
+router.post('/accept-gig', async (req, res) => {
+  const { responseId } = req.body;
+  const userID = req.oidc.user.sid;
+  const responseFound = await Response.findById(responseId)
+  const gigFound = await Gig.findById(responseFound.gigID)
+  if (gigFound.postedBy === userID) {
+    responseFound.accepted = true;
+    responseFound.save()
+    gigFound.active = false
+    gigFound.localAssigned = responseFound.applicant
+    gigFound.save()
+    res.json({ success: true })
+  } else {
+    res.json({ success: false })
+  }
+})
+
+router.post('/decline-gig', async (req, res) => {
+  const { responseId } = req.body;
+  const userID = req.oidc.user.sid;
+  const responseFound = await Response.findById(responseId)
+  const gigFound = await Gig.findById(responseFound.gigID)
+  if (gigFound.postedBy === userID) {
+    responseFound.accepted = false;
+    responseFound.save()
+    res.json({ success: true })
+  } else {
+    res.json({ success: false })
+  }
+})
+
 
 router.get('/new', requiresAuth(), function (req, res, next) {
   res.render('new')

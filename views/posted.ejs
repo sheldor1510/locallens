@@ -2,12 +2,12 @@
     <div style="display: block;">
         <div class="tabs">
             <a href="/dashboard">
-                <div class="tab active">
+                <div class="tab">
                     Recommended
                 </div>
             </a>
             <a href="/posted">
-                <div class="tab">
+                <div class="tab active">
                     Posted
                 </div>
             </a>
@@ -27,7 +27,7 @@
                 </div>
             </a>
         </div>
-        <h3>Recommended Gigs</h3>
+        <h3>Posted Gigs</h3>
         <div class="gigs">
             <% for (var i = 0; i < gigs.length; i++) { %>
                 <a href="/gig/<%= gigs[i]._id %>" style="text-decoration: none; color: black;">

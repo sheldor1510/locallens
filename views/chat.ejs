@@ -1,4 +1,5 @@
 <body>
+    <h2 style="position: fixed; top: 0; text-align: center;">Chat</h2>
     <div class="container-fluid">
         
         <ul class="list-group" id="messages"></ul>
@@ -26,7 +27,7 @@
             return false;
         });
         socket.on('chat message', function(text){
-            $("#messages").append('<li class="list-group-item">' + '<b>' + text.split(":")[0] + '</b>:' + text.split(":")[1] +'</li>');
+            $("#messages").append('<p class="list-group-item">' + '<b>' + text.split(":")[0] + '</b>:' + text.split(":")[1] +'</p>');
         });
     </script>
 </body>

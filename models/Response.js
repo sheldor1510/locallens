@@ -15,7 +15,8 @@ const ResponseSchema = new mongoose.Schema({
     },
     accepted: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     }
 })
 

@@ -1,0 +1,46 @@
+<body>
+    <div>
+        <h2>Gig Details</h2>
+        <img src="<%= img %>" style="height: 15vw; width: auto; margin: auto; display: flex; justify-content: center;">
+        <h3 style="text-align: center;"><%= gig.location %></h3>
+        <br>
+        <p style="text-align: center;"><%= gig.startDate %> - <%= gig.endDate %></p>
+        <div class="tab active" style="margin: auto; width: 25vw;">
+            <%= gig.type %> | <%= gig.typeText %>
+        </div><br>
+        <br>
+        <label>What they're looking for</label>
+        <p style="margin-top: 1vw;"><%= gig.lookingForText %></p>
+        <br><br>
+        <% if (showresponses == false) { %>
+            <label>To apply, write a note describing why you think you'll be a good fit</label>
+            <textarea
+                name="apply-note"
+                placeholder="I think I'll be a good choice since I am a professional hiker who has gone to over 30 hikes+."
+                maxlength="500"
+                id="apply-note"
+            ></textarea>
+            <input type="hidden" id="gigId" value="<%= gig._id %>">
+            <button id="apply-gig">Apply</button>
+        <% } else { %>
+            <label>Responses</label>
+            <% if (responses.length == 0) { %>
+                <p style="margin-top: 1vw">No responses yet</p>
+             <% } %>
+            <div class="responses">
+                <% for (var i = 0; i < responses.length; i++) { %>
+                    <input type="hidden" id="responseId" value="<%= responses[i]._id %>">
+                    <div class="response" >
+                        <p><b><%= responses[i].applicant %></b><br><%= responses[i].note %></p>
+                        <button id="accept-gig">
+                            accept
+                        </button>
+                        <button id="decline-gig">
+                            decline
+                        </button>
+                    </div>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</body>

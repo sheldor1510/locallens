@@ -1,4 +1,8 @@
-var router = require('express').Router();
+require('dotenv').config();
+const router = require('express').Router();
+const cohere = require('cohere-ai');
+cohere.init(process.env.COHERE_API_KEY);
+const { interestExamples, bioExamples } = require('../ai/data');
 const { requiresAuth } = require('express-openid-connect');
 const User = require('../models/User')
 const Gig = require('../models/Gig')
@@ -29,14 +33,30 @@ router.post('/save-profile', async function (req, res, next) {
   const data = req.body;
   const userID = req.oidc.user.sid;
   User.findOne({ sid: userID })
-  .then(user => {
+  .then(async (user) => {
     if (user) {
       console.log(user);
       user.location = data.location;
       user.duration = data.duration;
       user.bio = data.bio;
-      //TODO: put bio through AI parser and get tags and save them
-      const tags = [];
+
+      // Cohere AI: Put bio through AI parser and get tags and save them
+      const input = [data.bio];
+      const response = await cohere.classify({
+          inputs: input,
+          examples: bioExamples
+      });
+  
+      let tags = [];
+      const responseLabels = response.body.classifications[0].labels;
+  
+      for (const label in responseLabels) {
+          if (responseLabels[label].confidence >= 0.05) {
+              tags.push(label);
+          }
+          console.log(label + " = " + responseLabels[label]);
+      }
+
       user.tags = tags;
       user.save();
       res.json({ success: true, message: 'Profile completed!' })
@@ -60,8 +80,24 @@ router.get('/dashboard', requiresAuth(), async function (req, res, next) {
 router.post('/new-gig', requiresAuth(), async function (req, res, next) {
   const { location, startDate, endDate, type, lookingForText } = req.body;
   const userID = req.oidc.user.sid;
-  //TODO: put lookingForText through AI parser and get tags and save them
-  const tags = [];
+
+  // Cohere AI: lookingForText through AI parser and get tags and save them
+  const input = [lookingForText];
+  const response = await cohere.classify({
+      inputs: input,
+      examples: interestExamples
+  });
+
+  let tags = [];
+  const responseLabels = response.body.classifications[0].labels;
+
+  for (const label in responseLabels) {
+      if (responseLabels[label].confidence >= 0.01) {
+          tags.push(label);
+      }
+      console.log(label + " = " + responseLabels[label]);
+  }
+
   const newGig = new Gig({
     location,
     startDate,
